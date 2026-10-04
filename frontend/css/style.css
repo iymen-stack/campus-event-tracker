@@ -1,0 +1,59 @@
+/*
+Remove the browser's default body margin so the header
+and page background reach the edges of the viewport.
+*/
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+}
+
+/*
+Give the site header enough internal space so the title
+doesn't feel cramped.
+*/
+header {
+    background-color: #660033;
+    color: white;
+    padding: 20px 30px;
+    text-align: center;
+}
+
+/*
+Keep the main content away from the edges of the browser.
+*/
+main {
+    padding: 30px;
+}
+
+h2 {
+    color: #660033;
+    text-align: center;
+}
+
+/*
+Arrange event cards horizontally, center them within the page,
+and move cards onto a new row when there is not enough space.
+*/
+.event-list {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/*
+Make each event visually separate and keep cards around
+220px wide instead of stretching across the whole row.
+*/
+.event-card {
+    flex: 0 1 220px;
+    border: 3px solid #660033;
+    border-radius: 12px;
+    padding: 16px;
+    background-color: white;
+}
+
+.event-card h3 {
+    color: #660033;
+}
