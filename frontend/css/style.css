@@ -57,3 +57,53 @@ Make each event visually separate and keep cards around
 .event-card h3 {
     color: #660033;
 }
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+}
+
+.login-card {
+    background-color: white;
+    width: 350px;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 30px;
+    border-radius: 12px;
+    border: 3px solid #660033;
+}
+
+.login-card h2 {
+    margin-bottom: 25px;
+}
+
+.login-card label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.login-card input {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.login-card button {
+    width: 100%;
+    margin-top: 25px;
+    padding: 12px;
+    background-color: #660033;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.login-card button:hover {
+    background-color: #4d0026;
+}
