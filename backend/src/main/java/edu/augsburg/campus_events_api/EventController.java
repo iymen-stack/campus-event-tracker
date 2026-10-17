@@ -24,7 +24,9 @@ public class EventController {
                     e.event_id,
                     e.title,
                     e.category,
-                    l.name AS location_name
+                    l.name AS location_name,
+                    e.start_time,
+                    e.end_time
                 FROM events AS e
                 LEFT JOIN locations AS l
                     ON e.location_id = l.location_id;
