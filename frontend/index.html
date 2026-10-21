@@ -23,37 +23,72 @@
             <h2>EVENTS</h2>
 
             <!-- Groups the event cards so they can all share the same layout and spacing -->
-            <div class="event-list">
-
-                <!-- Each article represents one separate event using the same card structure -->
-                <article class="event-card">
-                    <h3>Smoothie Bowl Food Lab</h3>
-                    <p>October 8 • 4:00 PM - 8:00 PM</p>
-                    <p>Hagfors 108</p>
-                </article>
-
-                <article class="event-card">
-                    <h3>Med-School Application</h3>
-                    <p>October 8 • 4:00 PM - 5:00 PM</p>
-                    <p>Hagfors 150A</p>
-                </article>
-
-                <article class="event-card">
-                    <h3>STEM Peer Mentorship Travels to China</h3>
-                    <p>October 9 • 12:00 PM - 1:00 PM</p>
-                    <p>Hagfors 150A</p>
-                </article>
-
-                <article class="event-card">
-                    <h3>Build An Auggie</h3>
-                    <p>October 12 • 12:00 PM - 1:00 PM</p>
-                    <p>Student Lounge in CC</p>
-                </article>
-
-            </div>
+            <div class="event-list"></div>
+            <p class="event-status" role="status" aria-live="polite">Loading events...</p>
         </section>
 
     </main>
+
+    <script>
+        const eventList = document.querySelector(".event-list");
+        const eventStatus = document.querySelector(".event-status");
+
+        function formatDateTime(value) {
+            if (!value) {
+                return "Time unavailable";
+            }
+
+            const date = new Date(typeof value === "string" ? value.replace(" ", "T") : value);
+            if (Number.isNaN(date.getTime())) {
+                return String(value);
+            }
+
+            return date.toLocaleString(undefined, {
+                dateStyle: "medium",
+                timeStyle: "short"
+            });
+        }
+
+        function createEventCard(event) {
+            const card = document.createElement("article");
+            card.className = "event-card";
+
+            const title = document.createElement("h3");
+            title.textContent = event.title || "Untitled event";
+
+            const dateTime = document.createElement("p");
+            dateTime.textContent = `${formatDateTime(event.start_time)} - ${formatDateTime(event.end_time)}`;
+
+            const location = document.createElement("p");
+            location.textContent = event.location_name || "Location unavailable";
+
+            card.append(title, dateTime, location);
+            return card;
+        }
+
+        async function loadEvents() {
+            try {
+                const response = await fetch("/api/events");
+                if (!response.ok) {
+                    throw new Error(`Request failed with status ${response.status}`);
+                }
+
+                const events = await response.json();
+                if (!Array.isArray(events)) {
+                    throw new Error("The events response was not a list");
+                }
+
+                eventList.replaceChildren(...events.map(createEventCard));
+                eventStatus.textContent = events.length === 0 ? "No events found." : "";
+            } catch (error) {
+                console.error("Unable to load events:", error);
+                const reason = error instanceof Error ? error.message : String(error);
+                eventStatus.textContent = `Unable to load events: ${reason}. Make sure /api/events is available from this server.`;
+            }
+        }
+
+        loadEvents();
+    </script>
 </body>
 
 </html>
