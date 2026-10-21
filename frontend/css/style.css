@@ -57,6 +57,11 @@ Make each event visually separate and keep cards around
 .event-card h3 {
     color: #660033;
 }
+
+.event-status {
+    text-align: center;
+}
+
 .login-container {
     display: flex;
     justify-content: center;
