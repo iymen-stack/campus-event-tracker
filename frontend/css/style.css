@@ -31,6 +31,34 @@ h2 {
     text-align: center;
 }
 
+.event-filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    max-width: 1000px;
+    margin: 0 auto 24px;
+}
+
+.event-filters label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-weight: bold;
+}
+
+.event-filters input,
+.event-filters select {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 40px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: white;
+    font: inherit;
+    font-weight: normal;
+}
+
 /*
 Arrange event cards horizontally, center them within the page,
 and move cards onto a new row when there is not enough space.
