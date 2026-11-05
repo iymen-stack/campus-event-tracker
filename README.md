@@ -115,6 +115,35 @@ The JavaScript in `frontend/index.html` calls `fetch("/api/events")`, so the fro
 
 Stop the running app with **Ctrl+C** in its terminal.
 
+## Run locally on macOS (Google Chrome)
+
+The website works in any modern browser, including Google Chrome on a Mac. Chrome is **not** the web server: each developer must start MySQL and Spring Boot on their own computer. The URL `localhost` refers to the computer opening it.
+
+1. Install **Java 21 or newer**, **MySQL Server**, and **Git**. Check `java -version`, `mysql --version`, and `git --version` in Terminal. Use your normal Mac software installer or Homebrew. If MySQL was installed via Homebrew, `brew services start mysql` starts the service; otherwise use your installation's server controls.
+2. Clone this repository and enter its directory:
+
+```bash
+git clone https://github.com/iymen-stack/campus-event-tracker.git
+cd campus-event-tracker
+```
+
+3. Create a **fresh** MySQL schema named `augsburg_events` and load the seed SQL only if it is a disposable local database with **no data to keep**. The file `augsburg_database_updated` drops and recreates tables. Never rerun it on an existing populated database. You may use MySQL Workbench to create the schema and import the SQL script, or ask the team's database owner how to obtain a safe existing-data migration. Ensure your chosen MySQL user can SELECT events and locations and INSERT events.
+4. From the repository root, launch the development helper:
+
+```bash
+bash scripts/start-dev-mac.sh
+# Or choose a different HTTP port:
+bash scripts/start-dev-mac.sh 8081
+# Or specify your own MySQL account:
+DB_USER=my_local_mysql_user bash scripts/start-dev-mac.sh
+```
+
+The script prompts for the account's password without echoing it, configures Spring Boot to connect to `localhost:3306/augsburg_events`, and serves the frontend with the backend. It does **not** install MySQL, create tables or users, save credentials, or change database records.
+
+5. Once Spring reports a successful startup, open **Google Chrome** and visit `http://localhost:8080/` (or `http://localhost:8081/` if using port 8081). Check `http://localhost:8080/api/events` to see JSON. Press **Ctrl+C** in Terminal to stop the server.
+
+**If startup fails:** find the earlier `APPLICATION FAILED TO START`, `Description`, or `Caused by:` log entry. A missing datasource URL means Spring did not receive its configuration. An access-denied message points to MySQL credentials or permissions. A port-in-use message means another local process is listening on that port. The basic webpage and event-listing endpoint should be tested before claiming event creation is working through the website.
+
 ## API contract
 
 ### GET /api/events — currently on main
