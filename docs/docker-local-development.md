@@ -1,6 +1,6 @@
-# Campus Event Tracker — Docker local development (candidate)
+# Campus Event Tracker — Docker local development
 
-This path adapts CSC443's Java Dockerfile exercises to the project, using Docker Compose to start **two Linux containers** on Windows or macOS: Spring Boot (`app`) and MySQL (`db`). It is **not yet runtime-tested**. Promote these instructions into the root README after a verified run on Windows and a teammate's Mac.
+This path adapts CSC443's Java Dockerfile exercises to the project, using Docker Compose to start **two Linux containers** on Windows or macOS: Spring Boot (`app`) and MySQL (`db`). **Verified on Windows November 16, 2026:** both containers ran, MySQL was healthy, the homepage and events API returned HTTP 200, and the API retrieved 22 seeded events. **Still unverified:** a fresh teammate setup on macOS and real POST-to-database event creation. The root [README](../README.md) is the main onboarding guide; this file provides technical details.
 
 ## What you need
 
@@ -18,7 +18,7 @@ git clone https://github.com/iymen-stack/campus-event-tracker.git
 cd campus-event-tracker
 ```
 
-The `compose.yaml`, `Dockerfile`, `.dockerignore`, `.env.example`, and `docker/db/seed.sql` files must first be committed/merged before a teammate's clone contains them.
+The `compose.yaml`, `Dockerfile`, `.dockerignore`, `.env.example`, and `docker/db/seed.sql` files are currently included on local branch `feature/cet-integration`. Teammates cloning `main` won't receive them until the pull request is merged. For an existing clone, switch to a branch containing these files before following the steps.
 
 ### 2. Create local-only configuration
 
@@ -88,9 +88,9 @@ docker compose up -d
 - `docker/db/seed.sql` is a local-development copy of the November 4 dump with server-level GTID/binary-log commands removed. It is **not** a safe upgrade script for populated databases.
 - `.env` holds each developer's own local settings. It is not committed.
 
-## What has not been established yet
+## Verification status and remaining gaps
 
-- Docker Engine is currently stopped on the initial Windows inspection; no container build or startup has yet been tested.
+- **Verified on Windows November 16:** the application container ran, the database container was healthy, homepage/API returned HTTP 200, and the API returned 22 seeded events. This is not proof of a Mac runtime.
 - The November 4 seed predates Samson's Jira updates for reducing locations and expanding to 100+ events.
 - Real event insertion (POST 201 followed by a GET), and Mac/Apple Silicon runtime compatibility, still require verification.
 - A new schema dump **does not reinitialize an existing named volume**. Changes to previously initialized databases require reviewed migrations, not dropping/recreating data.
