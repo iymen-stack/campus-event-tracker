@@ -1,0 +1,7 @@
+.git
+.env
+.env.*
+backend/target
+**/target
+**/.DS_Store
+**/node_modules

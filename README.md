@@ -1,125 +1,191 @@
 # Campus Event Tracker
 
-A CSC 443 Software Engineering team project at Augsburg University. The goal is to help students discover campus events and, in a later integrated flow, create events.
+A CSC443 Software Engineering team project at Augsburg University. Students can browse campus events; the team is developing creation and other organizer workflows.
 
-**Team:** Iymen Mohamed, Samson Gyasi, and Abshir Edow.
+**Team:** Iymen Mohamed, Samson Gyasi, Abshir Edow.
 
-## Current state (November 2026)
+## Current functionality (verified baseline: November 16, 2026)
 
 | Feature | Status |
 | --- | --- |
-| Browse events | Implemented: Spring GET endpoint and a basic event-listing page |
-| MySQL-backed event data | Implemented for reads; local database configuration is required |
-| Login page | UI prototype only; authentication is not implemented |
-| Search and filter | Work in a separate pull request, not yet in `main` |
-| Create an event | Backend POST/validation work in progress on a separate local branch; not yet on `main` |
-| Delete events | Planned, not implemented |
+| Browse events from MySQL | **Working** through the Spring Boot GET API and browser. On November 16, Docker returned 22 seeded events. |
+| Search/filter events | **Implemented** in the browser: title, category, location, calendar date, and today/this-week filters. |
+| Create an event | **Backend implemented**: `POST /api/events`, request validation, and mocked controller tests. **Not** yet verified with a real database INSERT; there is no creation form in the merged frontend. |
+| Login | **UI prototype only** at `/css/login.html`. No user authentication, password verification, or access control. |
+| Delete an event | Not implemented. |
+| Setup on Windows via Docker | **Verified November 16, 2026**: MySQL healthy, Spring Boot running, `/` HTTP 200, `/api/events` HTTP 200, 22 events retrieved. |
+| Setup on macOS via Docker | Same intended Compose configuration, **not yet tested on a teammate's Mac**. |
 
-Do not confuse code that compiles with a tested end-to-end workflow. Creating an event through the website has **not** been verified.
+The event-search and event-creation backend PRs were merged into `main` on November 5, 2026. Docker setup is currently on `feature/cet-integration`; a new GitHub clone of `main` will **not** contain it until that branch is merged.
 
-## Tech stack and repository layout
+**Scope boundary:** A working event-listing site does not prove that users can create events from the website, log in, or delete events.
 
-- **Frontend:** HTML, CSS, and plain JavaScript in `frontend/`.
-- **Backend:** Java 21, Spring Boot 4.1.1, Spring MVC, Spring JDBC, Maven wrapper in `backend/`.
-- **Database:** MySQL; `events.location_id` references `locations.location_id`.
-- **Tests:** JUnit/Spring test dependencies are present. The checked-in application test is a basic context-load test; creation/validation tests are still needed.
+## Recommended setup — Docker Compose (Windows and macOS)
 
-```text
-campus-event-tracker/
-  backend/                     Spring Boot project and Maven wrapper
-    src/main/java/             REST controller and application entry point
-    src/main/resources/        Application configuration
-    src/test/                  Java tests
-  frontend/
-    index.html                 Event listing page
-    css/style.css              Styles
-  augsburg_database.sql        Original database dump
-  augsburg_events2.sql         Earlier exported database dump
-  augsburg_database_updated    Newer dump with AUTO_INCREMENT (see warnings below)
-  scripts/start-dev.ps1        Windows development startup helper
+Docker Compose starts two containers together:
+
+- `app`: the Java 21 / Spring Boot application, including the HTML, CSS, and JavaScript.
+- `db`: a private MySQL 8.4 server, initially seeded from `docker/db/seed.sql`.
+
+**Prerequisites:** Git, Docker Desktop (with the Docker engine running), terminal/PowerShell, and a browser. No separate Java, Maven, MySQL Server, or MySQL Workbench installation is required for **this** setup method.
+
+### 1. Obtain the source
+
+After `feature/cet-integration` is merged, a teammate can run:
+
+```bash
+git clone https://github.com/iymen-stack/campus-event-tracker.git
+cd campus-event-tracker
 ```
 
-## Run locally on Windows
+For an existing clone, first make sure you are on a branch containing `Dockerfile`, `compose.yaml`, `.env.example`, and `docker/db/seed.sql`. Do not run these instructions from an older checkout.
 
-### 1. Prerequisites
+### 2. Make your own local configuration
 
-- JDK 21 or newer installed and accessible to PowerShell (`java -version`).
-- A local MySQL server (e.g. Windows service `MySQL84`) and a MySQL client/Workbench.
-- A local MySQL user with access to the `augsburg_events` schema.
-- PowerShell. You do **not** need to install Maven globally; the repo includes `backend/mvnw.cmd`.
+In **Windows PowerShell**:
 
-Check your MySQL service:
+```powershell
+Copy-Item .env.example .env
+notepad .env
+```
+
+In **macOS Terminal**:
+
+```bash
+cp .env.example .env
+nano .env
+```
+
+Replace **both** example passwords (`DB_PASSWORD` and `DB_ROOT_PASSWORD`) with different development-only passwords. Save the file. `.env` is ignored by Git; **never commit it or send it to teammates**. Each developer chooses their own credentials. The default web port is `APP_PORT=8080`; change it to `8081` if port 8080 is occupied.
+
+On an existing Docker database volume, editing these password settings does **not** automatically change already-created MySQL accounts. Keep the settings consistent or plan a controlled credential change.
+
+### 3. Start the website and database
+
+Open Docker Desktop and make sure its engine is running. From the repository root run:
+
+```bash
+docker info
+docker compose config --quiet
+docker compose up --build -d
+docker compose ps
+```
+
+What the commands mean:
+
+| Command | Purpose |
+| --- | --- |
+| `docker info` | Verify the Docker engine is reachable. Installing the CLI alone is not enough. |
+| `docker compose config --quiet` | Validate the Compose configuration without printing the resolved environment values. |
+| `docker compose up --build -d` | Build the app image, start MySQL, wait for its health check, and start Spring Boot in the background. |
+| `docker compose ps` | Check that `db` is healthy and `app` is running. |
+
+The first run needs network access to download Docker images and Maven dependencies. On a new **empty Docker data volume**, MySQL automatically imports `docker/db/seed.sql` **once**. Subsequent starts reuse the stored database; changing the seed file does **not** update an existing volume.
+
+The Docker MySQL server is internal to the Compose network and does not publish port 3306 to Windows/macOS. Thus an existing host MySQL installation need not be stopped. The Spring application connects to the service name `db` inside Docker.
+
+### 4. Verify the result
+
+Open these URLs on the **same computer**:
+
+- [Website](http://localhost:8080/) — should show the campus event cards and search/filter controls.
+- [GET events API](http://localhost:8080/api/events) — should return a JSON array.
+
+If `APP_PORT` is different, use that port in both URLs. The default app is bound to `127.0.0.1`, so this is for local development: it is not a publicly hosted site and will not automatically let teammates visit **your** instance.
+
+On November 16, 2026, Windows Docker verification returned HTTP 200 on both URLs and 22 events from the seeded MySQL container. **A fresh macOS installation and real POST persistence are separate pending tests.**
+
+### 5. Stop, restart, rebuild, and inspect logs
+
+```bash
+docker compose down
+docker compose up -d
+docker compose up --build -d
+docker compose logs --tail=100 app
+docker compose logs --tail=100 db
+```
+
+- `down` stops/removes containers and their network, but **keeps** the named database volume.
+- `up -d` starts containers from the existing image/configuration.
+- `up --build -d` rebuilds after application or packaged frontend changes.
+- `logs` provides errors for the respective service.
+
+**Do not casually run `docker compose down -v`.** The `-v` removes the MySQL data volume and deletes locally stored events. The initialization SQL also drops/recreates tables and must **not** be used against a populated database as a migration.
+
+For the technical explanation of the Dockerfile, network, data volume, and known limitations, see [Docker local development notes](docs/docker-local-development.md).
+
+## Alternative: run without Docker
+
+Use this only when you deliberately want a native Java/MySQL environment. **Do not run native Spring Boot and Docker Spring Boot on the same HTTP port.**
+
+**Common requirements:** Java 21+, a local MySQL server containing the `augsburg_events` schema, and a database account with the required privileges. The repository's `backend/` contains the Maven wrapper; installing Maven globally is unnecessary.
+
+The included SQL exports are **not safe migrations**. `augsburg_database.sql`, `augsburg_events2.sql`, and `augsburg_database_updated` contain table-dropping statements, and their data/schemas differ. Only initialize a new disposable database using a reviewed schema. Back up an existing database and plan migrations separately. The application account needs SELECT access to browse events and INSERT rights to create them.
+
+### Windows PowerShell
+
+From the repository root:
 
 ```powershell
 Get-Service MySQL84
-# If it is stopped, run this from an administrator PowerShell:
-Start-Service MySQL84
-```
-
-The MySQL service listening on port 3306 and Spring Boot serving HTTP on port 8080 are **different processes**.
-
-### 2. Set up the database
-
-Use the schema named `augsburg_events`. For a **new, disposable local database only**, `augsburg_database_updated` contains the current sample tables and seed rows. Open it as a SQL script using MySQL Workbench after creating/selecting the `augsburg_events` schema.
-
-**Warning: the dump executes `DROP TABLE IF EXISTS` for `events` and `locations`. Running it against a database you already use will replace those tables and their data. Do not import it as a migration or over an existing database. Back up your data first.**
-
-The updated dump defines `events.event_id` and `locations.location_id` as `AUTO_INCREMENT`. Existing local databases are **not** updated automatically by pulling Git commits. Check their live schema before making changes:
-
-```sql
-SHOW CREATE TABLE events;
-SHOW CREATE TABLE locations;
-```
-
-Have a database owner review any necessary migration; do not rerun the full dump to change a primary key.
-
-The application has previously used a local MySQL account named `campus_reader`. Despite its name, saving new events also requires **INSERT** permission on `augsburg_events.events`. Verify that the account exists and has the required privileges; do not add passwords to Git or this README.
-
-### 3. Start the application (recommended)
-
-From the repository root in PowerShell:
-
-```powershell
+# If MySQL84 is installed but stopped, start it in an administrator PowerShell:
+# Start-Service MySQL84
 .\scripts\start-dev.ps1
 ```
 
-The script checks whether the chosen HTTP port is occupied, prompts for your local MySQL password, sets the Spring datasource environment variables, and launches Spring Boot from `backend/`. It also configures Spring's local static-resource path to use the existing `frontend/` directory, so the page and `/api/events` can use the same origin.
-
-Defaults: database `augsburg_events`, user `campus_reader`, MySQL port `3306`, HTTP port `8080`.
-
-To use another HTTP port or MySQL username:
+The script prompts for a MySQL password, launches the backend with the `frontend/` folder as static resources, and defaults to user `campus_reader`, database `augsburg_events`, and port 8080. To choose another HTTP port or account:
 
 ```powershell
 .\scripts\start-dev.ps1 -Port 8081 -DbUser your_local_user
 ```
 
-If PowerShell blocks local scripts under your execution policy, use a trusted checkout and, **in that terminal only**, run `Set-ExecutionPolicy -Scope Process Bypass` before launching the script. This does not change the machine-wide execution policy.
+If the system blocks trusted local scripts, `Set-ExecutionPolicy -Scope Process Bypass` applies only to that terminal session. Stop the native server with **Ctrl+C**.
 
-The script does not start/stop other applications, modify tables, create database accounts, or store your password in a file. Password access is temporary for the launched process; the script clears its environment-variable copy when the application exits.
+### macOS Terminal
 
-### 4. Check the application
+Install Java 21+, local MySQL Server, and Git using the platform's supported installation method. Start the MySQL server with its relevant service manager; `brew services start mysql` applies only if MySQL was installed via Homebrew. From the repository root:
 
-After Spring logs that it started, try:
-
-- `http://localhost:8080/` — frontend page when launched with `start-dev.ps1`.
-- `http://localhost:8080/api/events` — JSON from the current GET endpoint.
-- `http://localhost:8080/login.html` — **not guaranteed on `main`**: the login page currently sits in `frontend/css/login.html`; a separate branch moves it. Login is only a UI prototype.
-
-A quick GET check from another PowerShell window:
-
-```powershell
-Invoke-RestMethod -Uri "http://localhost:8080/api/events" -Method GET
+```bash
+bash scripts/start-dev-mac.sh
+# Optional alternate HTTP port:
+bash scripts/start-dev-mac.sh 8081
+# Optional alternate database user:
+DB_USER=my_local_mysql_user bash scripts/start-dev-mac.sh
 ```
 
-The JavaScript in `frontend/index.html` calls `fetch("/api/events")`, so the frontend must be served from the same origin as Spring (or use an explicitly configured development proxy). Double-clicking `index.html` as a `file://` page or using an unrelated static server will not necessarily reach the API.
+The Mac helper asks for the database password and runs Spring Boot with the frontend. **This native helper has not been runtime-tested on a Mac.** It does not create or migrate tables. Stop with **Ctrl+C**.
 
-Stop the running app with **Ctrl+C** in its terminal.
+### Browser note
+
+Chrome is a browser, not a Java/MySQL hosting platform. `localhost` refers to the machine running the browser. Do not open `frontend/index.html` directly as a `file://` page to test API integration; it calls the relative endpoint `/api/events` on the serving origin.
+
+## Repository structure
+
+```text
+campus-event-tracker/
+  backend/                         Java 21 / Spring Boot / Maven wrapper / tests
+  frontend/index.html              Event listing, search and filters
+  frontend/css/style.css           Website styles
+  frontend/css/login.html          Login UI prototype (not authentication)
+  Dockerfile                       Two-stage Java image build
+  compose.yaml                     app + db local development services
+  .env.example                     Nonsecret configuration template
+  docker/db/seed.sql               Initial Docker database data (first use only)
+  docs/docker-local-development.md Detailed Docker notes
+  scripts/start-dev.ps1            Optional native Windows startup
+  scripts/start-dev-mac.sh         Optional native macOS startup
+  augsburg_database.sql            Legacy SQL export — not a migration
+  augsburg_events2.sql             Legacy SQL export — not a migration
+  augsburg_database_updated        November 4 SQL export — not a migration
+```
+
+The Dockerfile follows the CSC443 two-stage Java build exercise: a JDK builds the Spring Boot JAR, then a JRE image runs it. The HTML/CSS/JS frontend is bundled into Spring Boot's static resources during that build.
 
 ## API contract
 
-### GET /api/events — currently on main
+### GET `/api/events`
 
-Returns an array of events selected from MySQL, with fields including:
+Reads events joined to locations from MySQL. Response objects include `event_id`, `title`, `category`, `location_name`, `start_time`, and `end_time`. Example **shape**, not a live response:
 
 ```json
 {
@@ -132,69 +198,57 @@ Returns an array of events selected from MySQL, with fields including:
 }
 ```
 
-The object above is an illustrative shape, **not** a live response or a promise of exact JSON datetime formatting.
+### POST `/api/events`
 
-### POST /api/events — work in progress, not on main
-
-Current backend feature work proposes this JSON request:
+The merged backend controller accepts JSON in this form:
 
 ```json
 {
   "title": "Coding Night",
   "category": "Student Activities",
   "locationId": 8,
-  "startTime": "2026-11-05T17:00:00",
-  "endTime": "2026-11-05T19:00:00"
+  "startTime": "2026-11-18T17:00:00",
+  "endTime": "2026-11-18T19:00:00"
 }
 ```
 
-Intended constraints: title required and at most 150 characters; category optional and at most 50; `locationId` must be a positive existing location ID; both times required; end time strictly after start time. A successful insert is intended to return HTTP 201. Error cases and persistence have not been fully tested.
+**Validation in code:** title required/nonblank and at most 150 characters; category optional and at most 50 characters; `locationId` required and positive; both times required; end time strictly after start time. Valid controller requests call a JDBC INSERT and return HTTP 201. Invalid input is covered by controller tests that use a mocked `JdbcTemplate`.
 
-The GET response uses database-style names such as `start_time` and `location_name`; the POST request uses Java record-style names such as `startTime` and `locationId`. Frontend work must follow the actual POST contract rather than assuming the GET object can be posted unchanged. The current POST request does **not** include a description or organizer field, even though the database table contains those columns.
+**Not yet verified against real MySQL:** successful INSERT, resulting GET, expected application response when `locationId` is positive but nonexistent, or a full create-event browser workflow. An existing location ID is a **database constraint**, not something the current Java bean validation independently checks. The GET response uses snake_case field names while the POST request uses camelCase; a frontend form must use the POST contract.
 
-## Build, test, and troubleshoot
+POST currently accepts no description or organizer field. There is no authenticated organizer/authorization check.
 
-From the `backend/` directory:
+## Tests and troubleshooting
+
+Five `EventControllerTest` tests cover valid creation and invalid-request cases using a **mocked** JDBC layer. There is also a Spring application context-load test (six tests previously passed in total). These tests do not demonstrate a real database INSERT or browser form.
+
+For a native build from `backend/` on Windows:
 
 ```powershell
-.\mvnw.cmd -DskipTests compile
 .\mvnw.cmd test
 ```
 
-`compile` checks Java compilation; it does not start a server or prove the API works. The checked-in context-load test may require working datasource configuration. A full test suite for event creation is not yet in `main`.
+On macOS/Linux: `./mvnw test`. A local backend test may need suitable datasource configuration. The Docker build intentionally packages with `-DskipTests`; a successful Docker image build is **not** a substitute for tests.
 
-If `spring-boot:run` ends with **BUILD FAILURE**, scroll **up** to `APPLICATION FAILED TO START`, the `Description`, or `Caused by:` lines. The final Maven message is a summary, not the root cause.
-
-| Symptom | Next check |
+| Symptom | Check |
 | --- | --- |
-| `url attribute is not specified` | Spring received no datasource URL; use the script or check variables in the **same terminal** as Maven |
-| MySQL connection refused | `Get-Service MySQL84` and `Test-NetConnection localhost -Port 3306` |
-| MySQL access denied | Credentials and account permissions |
-| HTTP port 8080 already in use | Inspect the process below or launch the script with `-Port 8081` |
-| `/api/events` returns 404 | Check that Campus Event Tracker (not another app) is serving that HTTP port |
-| Failed foreign key for `location_id` | The selected ID must exist in `locations` |
-| Missing generated event ID | Inspect `SHOW CREATE TABLE events`; updated dump alone does not migrate an existing schema |
+| Docker cannot connect to engine | Start Docker Desktop; verify `docker info` works |
+| App container is not running | `docker compose ps` then `docker compose logs --tail=100 app` |
+| Database unhealthy | `docker compose logs --tail=100 db`; inspect first-start seed errors |
+| HTTP port 8080 busy | Change `APP_PORT` in `.env`, then restart Compose |
+| Website loads but events API fails | Inspect app/database logs and `/api/events` response |
+| MySQL access denied | Confirm app settings match **the initialized volume's** user/password |
+| App can't resolve database hostname | Compose app uses `db` internally; native scripts use `localhost` |
+| Invalid event location ID | The ID must exist in the `locations` table |
+| Schema/seed changed but old data remains | Existing volume isn't re-seeded; use reviewed migrations, not `down -v` |
 
-To inspect which process is using port 8080 without stopping it:
+## Next integration milestones
 
-```powershell
-Get-NetTCPConnection -LocalPort 8080 -State Listen |
-  Select-Object LocalPort, State, OwningProcess
-Get-Process -Id <OwningProcess-from-output>
-```
+1. Verify a valid `POST /api/events` produces one new row in the **Docker** database and appears in a subsequent GET. Verify invalid requests do not insert rows.
+2. Agree on the actual location IDs/schema with the team and reconcile Samson's newer proposed 100+ event dataset. The current seed derives from the November 4 export and is not evidence of subsequent changes.
+3. Integrate a frontend event-creation form against the verified POST contract.
+4. Have a teammate run this setup from a **fresh clone on macOS**, following the instructions without hidden manual steps.
+5. Decide the course-required scope for login/authentication and deletion; neither is complete.
+6. Merge the validated integration branch, then update Jira/sprint evidence to reflect what is **actually verified**.
 
-Replace the angle-bracket placeholder with the numeric PID. Stop your own running development server with Ctrl+C; never terminate an unfamiliar process solely because it owns a port.
-
-## Integration checkpoints
-
-Before claiming event creation is complete, the team needs to verify:
-
-1. Frontend and backend can be opened together and GET events works.
-2. Frontend creation fields match the POST request record (including a real location ID).
-3. Invalid title and invalid time range return 400 without inserting anything.
-4. The active MySQL table generates event IDs and the application database user has INSERT permission.
-5. A valid POST creates exactly one event; a subsequent GET displays it.
-6. Search/filter changes and login-page relocation are reviewed and integrated separately.
-7. Setup instructions are tested on a teammate's machine before treating them as reproducible.
-
-This README describes the project as it exists and identifies incomplete work; it is not evidence that every integration checkpoint has passed.
+These instructions are for local development, not production deployment.
