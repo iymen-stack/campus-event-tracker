@@ -18,14 +18,11 @@ import jakarta.validation.Valid;
 @RestController
 public class EventController {
 
-
     private final JdbcTemplate jdbcTemplate;
-
 
     public EventController(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
-
 
     @GetMapping("/api/events")
     public List<Map<String, Object>> getEvents() {
@@ -46,20 +43,35 @@ public class EventController {
         return jdbcTemplate.queryForList(sqlQuery);
     }
 
-	@PostMapping("/api/events")
-	public ResponseEntity<Void> createEvents(@Valid @RequestBody EventToCreate eventToCreate){
-		String title = eventToCreate.title();
-		String category = eventToCreate.category();
-		int locationId = eventToCreate.locationId();
-		LocalDateTime startTime = eventToCreate.startTime();
-		LocalDateTime endTime = eventToCreate.endTime();
+    @PostMapping("/api/events")
+    public ResponseEntity<Void> createEvents(@Valid @RequestBody EventToCreate eventToCreate) {
+        String title = eventToCreate.title();
+        String category = eventToCreate.category();
+        int locationId = eventToCreate.locationId();
+        LocalDateTime startTime = eventToCreate.startTime();
+        LocalDateTime endTime = eventToCreate.endTime();
 
-		String sqlQuery = """
+        String locationSql = """
+                SELECT COUNT(*)
+                FROM locations
+                WHERE location_id = ?
+                """;
+
+        Integer locationCount = jdbcTemplate.queryForObject(
+                locationSql,
+                Integer.class,
+                locationId);
+
+        if (locationCount == null || locationCount == 0) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        String sqlQuery = """
                 insert into events(location_id,title,category,start_time,end_time) values(?,?,?,?,?)
 
 
                 """;
-		jdbcTemplate.update(sqlQuery,locationId,title,category,startTime,endTime);
-		return ResponseEntity.status(HttpStatus.CREATED).build();
-	}
+        jdbcTemplate.update(sqlQuery, locationId, title, category, startTime, endTime);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 }
