@@ -1,0 +1,37 @@
+# Local development only. Docker runs both the Java app and a private MySQL instance.
+name: campus-event-tracker
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-augsburg_events}
+      MYSQL_USER: ${DB_USER:-campus_app}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Create a local .env file from .env.example}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Create a local .env file from .env.example}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # Imported ONCE when the named volume is initially empty; not a migration.
+      - ./docker/db/seed.sql:/docker-entrypoint-initdb.d/01-seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysql --protocol=TCP -h 127.0.0.1 -u\"$$MYSQL_USER\" -p\"$$MYSQL_PASSWORD\" \"$$MYSQL_DATABASE\" -e 'SELECT COUNT(*) FROM events' >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "127.0.0.1:${APP_PORT:-8080}:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${DB_NAME:-augsburg_events}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-campus_app}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?Create a local .env file from .env.example}
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mysql_data:

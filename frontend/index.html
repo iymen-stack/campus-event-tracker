@@ -22,6 +22,35 @@
         <section>
             <h2>EVENTS</h2>
 
+            <div class="event-filters" aria-label="Search and filter events">
+                <label>
+                    Search by title
+                    <input id="title-search" type="search" placeholder="Search event titles">
+                </label>
+                <label>
+                    Category
+                    <select id="category-filter">
+                        <option value="">All categories</option>
+                    </select>
+                </label>
+                <label>
+                    Location
+                    <input id="location-filter" type="search" placeholder="Search locations">
+                </label>
+                <label>
+                    Date
+                    <input id="date-filter" type="date">
+                </label>
+                <label>
+                    Quick date filter
+                    <select id="date-range-filter">
+                        <option value="">Any date</option>
+                        <option value="today">Today</option>
+                        <option value="week">This week</option>
+                    </select>
+                </label>
+            </div>
+
             <!-- Groups the event cards so they can all share the same layout and spacing -->
             <div class="event-list"></div>
             <p class="event-status" role="status" aria-live="polite">Loading events...</p>
@@ -32,15 +61,88 @@
     <script>
         const eventList = document.querySelector(".event-list");
         const eventStatus = document.querySelector(".event-status");
+        const titleSearch = document.querySelector("#title-search");
+        const categoryFilter = document.querySelector("#category-filter");
+        const locationFilter = document.querySelector("#location-filter");
+        const dateFilter = document.querySelector("#date-filter");
+        const dateRangeFilter = document.querySelector("#date-range-filter");
+        let allEvents = [];
 
-        function formatDateTime(value) {
+        function parseDate(value) {
             if (!value) {
-                return "Time unavailable";
+                return null;
             }
 
             const date = new Date(typeof value === "string" ? value.replace(" ", "T") : value);
-            if (Number.isNaN(date.getTime())) {
-                return String(value);
+            return Number.isNaN(date.getTime()) ? null : date;
+        }
+
+        function localDateKey(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const day = String(date.getDate()).padStart(2, "0");
+            return `${year}-${month}-${day}`;
+        }
+
+        function matchesDate(event) {
+            const start = parseDate(event.start_time);
+            const end = parseDate(event.end_time) || start;
+            const selectedDate = dateFilter.value;
+
+            if (selectedDate && (!start || localDateKey(start) !== selectedDate)) {
+                return false;
+            }
+
+            if (!dateRangeFilter.value) {
+                return true;
+            }
+
+            const now = new Date();
+            const rangeStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const rangeEnd = new Date(rangeStart);
+
+            if (dateRangeFilter.value === "week") {
+                rangeStart.setDate(rangeStart.getDate() - ((rangeStart.getDay() + 6) % 7));
+                rangeEnd.setTime(rangeStart.getTime());
+                rangeEnd.setDate(rangeStart.getDate() + 7);
+            } else {
+                rangeEnd.setDate(rangeEnd.getDate() + 1);
+            }
+
+            return Boolean(start && end && start < rangeEnd && end >= rangeStart);
+        }
+
+        function renderEvents() {
+            const titleQuery = titleSearch.value.trim().toLocaleLowerCase();
+            const locationQuery = locationFilter.value.trim().toLocaleLowerCase();
+            const category = categoryFilter.value;
+
+            const matchingEvents = allEvents.filter((event) =>
+                (event.title || "").toLocaleLowerCase().includes(titleQuery)
+                && (!category || event.category === category)
+                && (event.location_name || "").toLocaleLowerCase().includes(locationQuery)
+                && matchesDate(event)
+            );
+
+            eventList.replaceChildren(...matchingEvents.map(createEventCard));
+            if (allEvents.length === 0) {
+                eventStatus.textContent = "No events found.";
+            } else if (matchingEvents.length === 0) {
+                eventStatus.textContent = "No events match your search and filters.";
+            } else {
+                eventStatus.textContent = "";
+            }
+        }
+
+        [titleSearch, categoryFilter, locationFilter, dateFilter, dateRangeFilter]
+            .forEach((filter) => filter.addEventListener("input", renderEvents));
+        categoryFilter.addEventListener("change", renderEvents);
+        dateRangeFilter.addEventListener("change", renderEvents);
+
+        function formatDateTime(value) {
+            const date = parseDate(value);
+            if (!date) {
+                return "Time unavailable";
             }
 
             return date.toLocaleString(undefined, {
@@ -73,13 +175,21 @@
                     throw new Error(`Request failed with status ${response.status}`);
                 }
 
-                const events = await response.json();
-                if (!Array.isArray(events)) {
+                const responseEvents = await response.json();
+                if (!Array.isArray(responseEvents)) {
                     throw new Error("The events response was not a list");
                 }
 
-                eventList.replaceChildren(...events.map(createEventCard));
-                eventStatus.textContent = events.length === 0 ? "No events found." : "";
+                allEvents = responseEvents;
+                const categories = [...new Set(allEvents.map((event) => event.category).filter(Boolean))]
+                    .sort((a, b) => a.localeCompare(b));
+                categories.forEach((category) => {
+                    const option = document.createElement("option");
+                    option.value = category;
+                    option.textContent = category;
+                    categoryFilter.append(option);
+                });
+                renderEvents();
             } catch (error) {
                 console.error("Unable to load events:", error);
                 const reason = error instanceof Error ? error.message : String(error);

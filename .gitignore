@@ -1,0 +1,6 @@
+# Keep local credentials, build outputs, and OS artifacts out of Git.
+.env
+.env.*
+!.env.example
+backend/target/
+.DS_Store
