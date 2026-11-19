@@ -1,0 +1,93 @@
+-- MySQL dump 10.13  Distrib 26.7.0, for macos26.6 (arm64)
+--
+-- Host: localhost    Database: augsburg_events
+-- ------------------------------------------------------
+-- Server version	26.7.0
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+SET @MYSQLDUMP_TEMP_LOG_BIN = @@SESSION.SQL_LOG_BIN;
+SET @@SESSION.SQL_LOG_BIN= 0;
+
+--
+-- GTID state at the beginning of the backup 
+--
+
+SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ '4cb567e0-c183-11f1-9adb-cdfa7e89325f:1-37';
+
+--
+-- Table structure for table `events`
+--
+
+DROP TABLE IF EXISTS `events`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `events` (
+  `event_id` int NOT NULL AUTO_INCREMENT,
+  `title` varchar(150) NOT NULL,
+  `description` text,
+  `category` varchar(50) DEFAULT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime NOT NULL,
+  `location_id` int DEFAULT NULL,
+  `organizer` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`event_id`),
+  KEY `location_id` (`location_id`),
+  CONSTRAINT `events_ibfk_1` FOREIGN KEY (`location_id`) REFERENCES `locations` (`location_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `events`
+--
+
+LOCK TABLES `events` WRITE;
+/*!40000 ALTER TABLE `events` DISABLE KEYS */;
+INSERT INTO `events` VALUES (1,'Induction Hall of Fame','Event that celebrates athletes at Augsburg','Sports','2026-10-14 10:00:00','2026-10-14 11:30:00',1,'Augsburg Athletic Department'),(2,'Math_Competition','Augsburg math competition','Education','2026-10-13 04:30:00','2026-10-13 06:00:00',18,'Augsburg Math Department'),(3,'Augsburg Women\'s Volleyball Match vs Macalester','Volleyball match','Sports','2026-10-22 19:00:00','2026-10-22 21:00:00',8,'Augsburg Athletic Department'),(4,'Campus Cupboard','Campus food resource','Food Resource','2026-10-23 12:20:00','2026-10-23 17:00:00',5,'Augsburg University'),(5,'Augsburg Men\'s Ice Hockey vs Hamline University','Hockey game','Sports','2026-10-23 19:00:00','2026-10-23 21:00:00',9,'Augsburg Athletic Department'),(6,'Much Ado About Nothing Friday Movie Night','Movie night','Entertainment','2026-10-23 18:00:00','2026-10-23 21:00:00',7,'Much Ado About Nothing - Creative Team'),(7,'Augsburg Women\'s Ice Hockey vs St. Olaf','Hockey game','Sports','2026-10-24 15:00:00','2026-10-24 18:00:00',9,'Augsburg Athletic Department'),(8,'Psychological Thriller Movie Night','Event to watch a thriller movie','Entertainment','2026-10-26 19:00:00','2026-10-26 21:00:00',7,'Augsburg Psychological Association'),(9,'Francophone Meet-up','Event for people from Francophone countries','Misc','2026-10-27 15:30:00','2026-10-27 16:30:00',8,NULL),(10,'MSA Dawah Table','Event related to Islam','Religion','2026-10-28 11:00:00','2026-10-28 13:00:00',6,'MSA Dawah'),(11,'Living Stories Series Opener','A talk on commitment from different traditions','Religion','2026-10-28 12:00:00','2026-10-28 12:20:00',6,NULL),(12,'PAPM Spooky Night','Cookie decorating, fun activities, and free food and drinks','Entertainment','2026-10-28 16:00:00','2026-10-28 18:00:00',7,'Campus Life'),(13,'Book Club Third Meeting','Discussing the first half of the club\'s current book','Social','2026-10-28 17:00:00','2026-10-28 18:30:00',11,'Campus Life'),(14,'Augsburg Women\'s Soccer vs Macalester','Soccer game','Sports','2026-10-30 16:30:00','2026-10-30 18:30:00',3,'Augsburg Athletic Department'),(15,'Augsburg Men\'s Soccer vs Macalester','Soccer game','Sports','2026-10-30 19:00:00','2026-10-30 21:00:00',3,'Augsburg Athletic Department'),(16,'Augsburg Men\'s Football vs Carleton College','Football game','Sports','2026-10-31 12:00:00','2026-10-31 15:00:00',3,'Augsburg Athletic Department'),(17,'Augsburg Women\'s Volleyball vs St. Olaf','Volleyball game','Sports','2026-10-31 19:00:00','2026-10-31 21:00:00',10,'Augsburg Athletic Department'),(18,'Assessment Committee',NULL,'Social','2026-11-02 16:00:00','2026-11-02 17:00:00',8,NULL),(19,'Augsburg Women\'s Wrestling vs Luther College','Wrestling match','Sports','2026-11-04 19:00:00','2026-11-04 22:00:00',10,'Augsburg Athletic Department'),(20,'Daily Chapel: THRIVE Series: Daniel Hickox-Young','Chapel speaking','Religion','2026-11-04 12:00:00','2026-11-04 12:20:00',1,NULL),(21,'Business Career Fair','An event to meet different companies and find job opportunities','Social','2026-09-30 14:00:00','2026-09-30 16:00:00',8,NULL),(22,'Staff Senate: Food Truck Friday',NULL,'Staff Senate','2026-11-06 12:00:00','2026-11-06 13:00:00',6,'Staff Senate'),(23,'Provost Office Hours','Drop-in office hours with the Provost','Education','2026-11-06 14:00:00','2026-11-06 15:00:00',NULL,'Office of the Provost'),(24,'Campus Cupboard Fall Hours','Campus food resource','Food Resource','2026-11-06 14:00:00','2026-11-06 17:00:00',5,'Augsburg University'),(25,'Augsburg Women\'s Volleyball vs UW-Eau Claire','Volleyball match','Sports','2026-11-06 19:00:00','2026-11-06 21:00:00',10,'Augsburg Athletic Department'),(26,'Augsburg Men\'s Basketball at University of Puget Sound','Away basketball game','Sports','2026-11-06 21:00:00','2026-11-06 23:00:00',NULL,'Augsburg Athletic Department'),(27,'Augsburg Women\'s Ice Hockey vs Aurora University','Hockey game','Sports','2026-11-07 14:00:00','2026-11-07 16:30:00',9,'Augsburg Athletic Department'),(28,'Augsburg Women\'s Volleyball at Saint Mary\'s University','Away volleyball match','Sports','2026-11-07 19:00:00','2026-11-07 21:00:00',NULL,'Augsburg Athletic Department'),(29,'Augsburg Men\'s Ice Hockey at UW-Stevens Point','Away hockey game','Sports','2026-11-07 19:00:00','2026-11-07 22:00:00',NULL,'Augsburg Athletic Department'),(30,'Augsburg Men\'s Basketball at Pacific Lutheran University','Away basketball game','Sports','2026-11-07 21:00:00','2026-11-07 23:00:00',NULL,'Augsburg Athletic Department'),(31,'Augsburg Women\'s Wrestling at UW-Stevens Point Open','Away wrestling tournament','Sports','2026-11-07 09:00:00','2026-11-07 12:00:00',NULL,'Augsburg Athletic Department'),(32,'Augsburg Football at Gustavus Adolphus College','Away football game','Sports','2026-11-07 12:00:00','2026-11-07 15:00:00',NULL,'Augsburg Athletic Department'),(33,'Augsburg Women\'s Basketball vs UW-Stout','Basketball game','Sports','2026-11-07 13:00:00','2026-11-07 15:00:00',10,'Augsburg Athletic Department'),(34,'First-Generation College Celebration Week','Week-long celebration of first-generation college students (11/9-11/13)','Social','2026-11-09 08:00:00','2026-11-09 17:00:00',NULL,NULL),(35,'Support the State Grant: Letters to Legislators','Write letters to legislators in support of the State Grant','Misc','2026-11-09 10:00:00','2026-11-09 14:00:00',6,NULL),(36,'First Gen Week Kick-Off','Opening event for First-Generation College Celebration Week','Social','2026-11-09 11:00:00','2026-11-09 15:00:00',NULL,NULL),(37,'First Gen Student Panel','Panel of first-generation students','Education','2026-11-09 11:00:00','2026-11-09 12:30:00',NULL,NULL),(38,'Daily Chapel: First Generation Week: Kao Nuo','Chapel speaking','Religion','2026-11-09 12:00:00','2026-11-09 12:20:00',1,NULL),(39,'Daily Chapel: Musical Midday Prayer','Chapel service with music','Religion','2026-11-10 11:50:00','2026-11-10 12:10:00',1,NULL),(40,'Campus Cupboard Fall Hours','Campus food resource','Food Resource','2026-11-10 14:00:00','2026-11-10 17:00:00',5,'Augsburg University'),(41,'All-Adjunct Get-together','Gathering for adjunct faculty','Social','2026-11-10 15:15:00','2026-11-10 16:30:00',NULL,NULL),(42,'GAAC (Graduate Academic Affairs Committee)','Committee meeting','Misc','2026-11-10 15:30:00','2026-11-10 17:00:00',NULL,NULL),(43,'Job Interviewing Tips and Tricks for First Gen Week','Workshop on job interviewing for first-generation students','Education','2026-11-10 18:00:00','2026-11-10 20:00:00',NULL,NULL),(44,'Free Vaccine Clinic','Free vaccinations available on campus','Misc','2026-11-11 10:00:00','2026-11-11 14:00:00',NULL,NULL),(45,'MSA Dawah Table','Event related to Islam','Religion','2026-11-11 11:00:00','2026-11-11 13:00:00',6,'MSA Dawah'),(46,'Daily Chapel: Living Stories Series: Nasrieen Habib','Chapel speaking','Religion','2026-11-11 12:00:00','2026-11-11 12:20:00',1,NULL),(47,'Provost Office Hours','Drop-in office hours with the Provost in Hagfors first floor lobby','Education','2026-11-11 12:00:00','2026-11-11 13:00:00',8,'Office of the Provost'),(48,'Break Up With Big Tech',NULL,'Misc','2026-11-11 12:00:00','2026-11-11 13:00:00',NULL,NULL),(49,'AASA 4th General Gathering: First Generation Celebration','AASA general meeting celebrating first-generation students','Social','2026-11-11 12:00:00','2026-11-11 13:00:00',NULL,'AASA'),(50,'First Gen Finance with Bank of America','Personal finance session for first-generation students with Bank of America','Education','2026-11-11 12:00:00','2026-11-11 13:00:00',NULL,NULL),(51,'MCAT Info Session','Information session about the MCAT','Education','2026-11-11 12:00:00','2026-11-11 13:00:00',NULL,NULL),(52,'Campus Cupboard Fall Hours','Campus food resource','Food Resource','2026-11-11 14:00:00','2026-11-11 17:00:00',5,'Augsburg University'),(53,'Daily Chapel: Sarah Root, pastoral intern','Chapel speaking','Religion','2026-11-12 11:50:00','2026-11-12 12:10:00',1,NULL),(54,'Echo General Meeting - You Should \'Nov\'er Miss a Meeting','General meeting of the Echo','Social','2026-11-12 11:50:00','2026-11-12 12:10:00',NULL,'Echo'),(55,'Working Toward Inclusive Spaces Workshop','Workshop on creating inclusive spaces','Education','2026-11-12 12:20:00','2026-11-12 14:20:00',NULL,NULL),(56,'Campus Cupboard Fall Hours','Campus food resource','Food Resource','2026-11-12 14:00:00','2026-11-12 17:00:00',5,'Augsburg University'),(57,'ASAO: Meet the Employers','Networking event to meet employers','Social','2026-11-12 15:00:00','2026-11-12 17:00:00',NULL,'ASAO'),(58,'Committee on Tenure & Promotion','Committee meeting','Misc','2026-11-12 15:30:00','2026-11-12 17:00:00',NULL,NULL),(59,'PPC','Committee meeting','Misc','2026-11-12 16:00:00','2026-11-12 17:15:00',NULL,NULL),(60,'First Generation: Draw Your Journey!','Art activity for First-Generation College Celebration Week','Entertainment','2026-11-12 18:00:00','2026-11-12 20:30:00',NULL,NULL),(61,'Daily Chapel: Paul Lutter','Chapel speaking','Religion','2026-11-13 12:00:00','2026-11-13 12:20:00',1,NULL),(62,'Rooted Together: Faculty and Staff Roles in First-Gen Retention and Persistence','Session for faculty and staff on supporting first-generation students','Education','2026-11-13 12:00:00','2026-11-13 13:00:00',NULL,NULL),(63,'Q&A Session with Psych Upperclassmen','Q&A with upper-level psychology students','Education','2026-11-13 12:00:00','2026-11-13 13:00:00',NULL,NULL),(64,'Jummah Prayer','Friday congregational prayer','Religion','2026-11-13 12:20:00','2026-11-13 13:00:00',NULL,NULL),(65,'Provost Office Hours','Drop-in office hours with the Provost','Education','2026-11-13 14:00:00','2026-11-13 15:00:00',NULL,'Office of the Provost'),(66,'Campus Cupboard Fall Hours','Campus food resource','Food Resource','2026-11-13 14:00:00','2026-11-13 17:00:00',5,'Augsburg University'),(67,'Estimathon','Team estimation competition','Education','2026-11-13 15:30:00','2026-11-13 17:30:00',NULL,NULL),(68,'Augsburg Women\'s Basketball vs Millikin University','Basketball game','Sports','2026-11-13 18:00:00','2026-11-13 20:00:00',10,'Augsburg Athletic Department'),(69,'Future Over Influence',NULL,'Misc','2026-11-13 18:00:00','2026-11-13 20:00:00',NULL,NULL),(70,'Augsburg Men\'s Wrestling at Luther College Open','Away wrestling tournament','Sports','2026-11-14 09:00:00','2026-11-14 12:00:00',NULL,'Augsburg Athletic Department'),(71,'Augsburg Women\'s Wrestling at Luther College Open','Away wrestling tournament','Sports','2026-11-14 09:00:00','2026-11-14 12:00:00',NULL,'Augsburg Athletic Department'),(72,'Augsburg Women\'s Swimming and Diving at Macalester Twin Cities Invitational','Away swim and dive meet','Sports','2026-11-14 11:00:00','2026-11-14 14:00:00',NULL,'Augsburg Athletic Department'),(73,'Augsburg Women\'s Cross Country at NCAA DIII North Regional','NCAA Division III North Regional, hosted by St. Olaf','Sports','2026-11-14 11:00:00','2026-11-14 14:00:00',NULL,'Augsburg Athletic Department'),(74,'Augsburg Football at Hamline University','Away football game','Sports','2026-11-14 12:00:00','2026-11-14 15:00:00',NULL,'Augsburg Athletic Department'),(75,'Augsburg Men\'s Cross Country at NCAA DIII North Regional','NCAA Division III North Regional, hosted by St. Olaf','Sports','2026-11-14 12:00:00','2026-11-14 15:00:00',NULL,'Augsburg Athletic Department'),(76,'Augsburg Women\'s Basketball vs Illinois Wesleyan University','Basketball game','Sports','2026-11-14 15:00:00','2026-11-14 17:00:00',10,'Augsburg Athletic Department'),(77,'Mindful Monday with Geoffrey Gill','Midday mindfulness session','Religion','2026-11-16 12:00:00','2026-11-16 12:20:00',1,NULL),(78,'Advising as a Belonging Practice: Webinar for Faculty & Staff','Online webinar for faculty and staff on advising','Education','2026-11-16 13:00:00','2026-11-16 14:00:00',NULL,NULL),(79,'Campus Cupboard Fall Hours','Campus food resource','Food Resource','2026-11-16 14:00:00','2026-11-16 17:00:00',5,'Augsburg University'),(80,'From Microinequities (Microaggressions) to Inclusion Workshop','Workshop on microaggressions and inclusion','Education','2026-11-16 15:00:00','2026-11-16 16:30:00',NULL,NULL),(81,'Assessment Committee',NULL,'Social','2026-11-16 16:00:00','2026-11-16 17:00:00',8,NULL),(82,'Give Thanks With Mort!','Thanksgiving-themed gathering','Social','2026-11-16 18:00:00','2026-11-16 20:00:00',NULL,NULL),(83,'Daily Chapel: Musical Midday Prayer','Chapel service with music','Religion','2026-11-17 11:50:00','2026-11-17 12:10:00',1,NULL),(84,'Campus Cupboard Fall Hours','Campus food resource','Food Resource','2026-11-17 14:00:00','2026-11-17 17:00:00',5,'Augsburg University'),(85,'Joint Student Success Committee Meeting','Committee meeting','Misc','2026-11-17 15:30:00','2026-11-17 17:00:00',NULL,NULL),(86,'Bench Pressed',NULL,'Misc','2026-11-17 16:00:00','2026-11-17 17:00:00',NULL,NULL),(87,'Brains, Buzzers & Battles','Trivia-style competition','Entertainment','2026-11-17 19:00:00','2026-11-17 20:00:00',NULL,NULL),(88,'Augsburg Women\'s Basketball at Crown College','Away basketball game','Sports','2026-11-17 19:00:00','2026-11-17 21:00:00',NULL,'Augsburg Athletic Department'),(89,'Early Morning Mocktails','Morning social with mocktails','Social','2026-11-18 09:00:00','2026-11-18 10:00:00',NULL,NULL),(90,'MSA Dawah Table','Event related to Islam','Religion','2026-11-18 11:00:00','2026-11-18 13:00:00',6,'MSA Dawah'),(91,'Daily Chapel: THRIVE Series: Kevin Cheatham','Chapel speaking','Religion','2026-11-18 12:00:00','2026-11-18 12:20:00',1,NULL),(92,'Provost Office Hours','Drop-in office hours with the Provost in Hagfors first floor lobby','Education','2026-11-18 12:00:00','2026-11-18 13:00:00',8,'Office of the Provost'),(93,'Tie Blanket Making with APPAC!','Make tie blankets with APPAC','Social','2026-11-18 12:00:00','2026-11-18 13:00:00',NULL,'APPAC'),(94,'Focused Conversation: Future of Place-Based Work and Community Engaged Learning','Discussion on place-based work and community engaged learning','Education','2026-11-18 12:30:00','2026-11-18 13:30:00',NULL,NULL),(95,'Campus Cupboard Fall Hours','Campus food resource','Food Resource','2026-11-18 14:00:00','2026-11-18 17:00:00',5,'Augsburg University'),(96,'Faculty Senate','Faculty Senate meeting','Misc','2026-11-18 15:30:00','2026-11-18 17:00:00',NULL,'Faculty Senate'),(97,'Mortensen Pet Party','Pet-themed social event','Social','2026-11-18 18:00:00','2026-11-18 19:00:00',NULL,NULL),(98,'Daily Chapel: University Pastor John Schwehn','Chapel speaking','Religion','2026-11-19 11:50:00','2026-11-19 12:10:00',1,NULL),(99,'Echo General Meeting - Last Meeting of the Semester','Final general meeting of the Echo for the semester','Social','2026-11-19 11:50:00','2026-11-19 12:10:00',NULL,'Echo'),(100,'Campus Cupboard Fall Hours','Campus food resource','Food Resource','2026-11-19 14:00:00','2026-11-19 17:00:00',5,'Augsburg University');
+/*!40000 ALTER TABLE `events` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `locations`
+--
+
+DROP TABLE IF EXISTS `locations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `locations` (
+  `location_id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `capacity` int DEFAULT NULL,
+  PRIMARY KEY (`location_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `locations`
+--
+
+LOCK TABLES `locations` WRITE;
+/*!40000 ALTER TABLE `locations` DISABLE KEYS */;
+INSERT INTO `locations` VALUES (1,'Hoversten Chapel',400),(3,'Augsburg Turf Field',700),(5,'Anderson Residence Hall',600),(6,'Chirstensen Center',1000),(7,'Foss Center',500),(8,'Hagfors Center',1500),(9,'Ice Arena',300),(10,'Kennedy Center',250),(11,'Lindell Library',250),(18,'Science Hall',500);
+/*!40000 ALTER TABLE `locations` ENABLE KEYS */;
+UNLOCK TABLES;
+SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2026-11-19  7:34:33
