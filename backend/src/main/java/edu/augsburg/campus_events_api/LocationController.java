@@ -1,6 +1,7 @@
 package edu.augsburg.campus_events_api;
 
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,6 +25,14 @@ public class LocationController {
                 ORDER BY name
                 """;
 
-        return jdbcTemplate.queryForList(sql);
+        return jdbcTemplate.queryForList(sql).stream()
+                .map(this::normalizeKeys)
+                .toList();
+    }
+
+    private Map<String, Object> normalizeKeys(Map<String, Object> row) {
+        Map<String, Object> normalized = new LinkedHashMap<>();
+        row.forEach((key, value) -> normalized.put(key.toLowerCase(), value));
+        return normalized;
     }
 }
