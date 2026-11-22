@@ -307,7 +307,33 @@ main {
     font-size: 13px;
     line-height: 1.5;
 }
+.event-card .delete-event-button {
+    margin-top: 18px;
+    padding: 9px 16px;
+    border: 1px solid #a21d36;
+    border-radius: 6px;
+    background-color: white;
+    color: #a21d36;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
 
+.event-card .delete-event-button:hover {
+    background-color: #a21d36;
+    color: white;
+}
+
+.event-card .delete-event-button:focus-visible {
+    outline: 3px solid #a21d36;
+    outline-offset: 3px;
+}
+
+.event-card .delete-event-button:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
 .event-status {
     margin: 18px 0 0;
     color: #746b72;
