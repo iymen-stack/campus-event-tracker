@@ -40,7 +40,15 @@ public class EventController {
                     ON e.location_id = l.location_id;
                 """;
 
-        return jdbcTemplate.queryForList(sqlQuery);
+        return jdbcTemplate.queryForList(sqlQuery).stream()
+                .map(this::normalizeKeys)
+                .toList();
+    }
+
+    private Map<String, Object> normalizeKeys(Map<String, Object> row) {
+        Map<String, Object> normalized = new java.util.LinkedHashMap<>();
+        row.forEach((key, value) -> normalized.put(key.toLowerCase(), value));
+        return normalized;
     }
 
     @PostMapping("/api/events")

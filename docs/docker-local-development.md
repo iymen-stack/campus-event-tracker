@@ -1,6 +1,6 @@
 # Campus Event Tracker — Docker local development
 
-This path adapts CSC443's Java Dockerfile exercises to the project, using Docker Compose to start **two Linux containers** on Windows or macOS: Spring Boot (`app`) and MySQL (`db`). **Verified on Windows November 16, 2026:** both containers ran, MySQL was healthy, the homepage and events API returned HTTP 200, and the API retrieved 22 seeded events. **Still unverified:** a fresh teammate setup on macOS and real POST-to-database event creation. The root [README](../README.md) is the main onboarding guide; this file provides technical details.
+This path adapts CSC443's Java Dockerfile exercises to the project, using Docker Compose to start **two Linux containers** on Windows or macOS: Spring Boot (`app`) and MySQL (`db`). **Verified on Windows November 16, 2026:** both containers ran, MySQL was healthy, the homepage and events API returned HTTP 200, and the API retrieved 22 seeded events. The refreshed checked-in seed now contains 100 events and 20 locations; a fresh-database runtime check of that seed is still needed. **Also unverified:** a fresh teammate setup on macOS and real POST-to-database event creation. The root [README](../README.md) is the main onboarding guide; this file provides technical details.
 
 ## What you need
 
@@ -18,7 +18,7 @@ git clone https://github.com/iymen-stack/campus-event-tracker.git
 cd campus-event-tracker
 ```
 
-The `compose.yaml`, `Dockerfile`, `.dockerignore`, `.env.example`, and `docker/db/seed.sql` files are currently included on local branch `feature/cet-integration`. Teammates cloning `main` won't receive them until the pull request is merged. For an existing clone, switch to a branch containing these files before following the steps.
+The `compose.yaml`, `Dockerfile`, `.dockerignore`, `.env.example`, and refreshed `docker/db/seed.sql` are on branch `feature/event-search-filters`. Teammates cloning `main` won't receive the latest seed until that branch is merged. For an existing clone, switch to `feature/event-search-filters` before following the steps.
 
 ### 2. Create local-only configuration
 
@@ -85,13 +85,12 @@ docker compose up -d
 - `Dockerfile`: `FROM eclipse-temurin:21-jdk AS build` uses a Java JDK to build; the second `FROM eclipse-temurin:21-jre` creates the runtime image. This follows the two-stage classroom example.
 - The Maven wrapper builds Spring Boot; the frontend is copied to `src/main/resources/static/` before packaging, so it can be served by the same application.
 - `compose.yaml` describes two services, their private network, container startup dependency, and the persistent MySQL volume.
-- `docker/db/seed.sql` is a local-development copy of the November 4 dump with server-level GTID/binary-log commands removed. It is **not** a safe upgrade script for populated databases.
+- `docker/db/seed.sql` is the refreshed 100-event local-development seed. It is imported only into a brand-new Docker database and is **not** a safe upgrade script for populated databases.
 - `.env` holds each developer's own local settings. It is not committed.
 
 ## Verification status and remaining gaps
 
-- **Verified on Windows November 16:** the application container ran, the database container was healthy, homepage/API returned HTTP 200, and the API returned 22 seeded events. This is not proof of a Mac runtime.
-- The November 4 seed predates Samson's Jira updates for reducing locations and expanding to 100+ events.
+- **Verified on Windows November 16:** the application container ran, the database container was healthy, homepage/API returned HTTP 200, and the API returned 22 events from the then-current seed. The refreshed seed contains 100 events and 20 locations, but that updated count has not yet been runtime-verified. This is not proof of a Mac runtime.
 - Real event insertion (POST 201 followed by a GET), and Mac/Apple Silicon runtime compatibility, still require verification.
 - A new schema dump **does not reinitialize an existing named volume**. Changes to previously initialized databases require reviewed migrations, not dropping/recreating data.
 

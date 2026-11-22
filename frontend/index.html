@@ -11,22 +11,62 @@
 
 <body>
 
-    <!-- Introduces the page and tells the user what site they are on -->
     <header>
-        <h1>Campus Event Tracker</h1>
+        <div class="site-header">
+            <a class="brand" href="./index.html" aria-label="Campus Event Tracker home">
+                <span class="brand-mark" aria-hidden="true">A</span>
+                <span>Campus Event Tracker</span>
+            </a>
+            <nav aria-label="Main navigation">
+                <a href="./index.html" aria-current="page">Home</a>
+                <a href="#events">All Events</a>
+                <a href="#calendar">Calendar</a>
+                <a class="login-link" href="css/login.html">Login</a>
+            </nav>
+        </div>
     </header>
 
-    <!-- Keeps the page's primary content separate from the site header -->
     <main>
-        <!-- Groups all of the campus events under one Events heading -->
-        <section>
-            <h2>EVENTS</h2>
+        <section class="hero">
+            <div class="hero-copy">
+                <p class="eyebrow">AUGSBURG UNIVERSITY · MINNEAPOLIS, MN</p>
+                <h1>Find your next campus moment.</h1>
+                <p class="hero-description">Discover what's happening around Augsburg, meet your community, and make the most of being on campus.</p>
+                <form class="hero-search" role="search" onsubmit="return false">
+                    <label class="sr-only" for="title-search">Search campus events</label>
+                    <input id="title-search" type="search" placeholder="Search events by name">
+                    <button type="submit" aria-label="Search events">Search</button>
+                </form>
+                <p class="hero-note">Find student activities, performances, athletics, and more.</p>
+            </div>
+            <div class="hero-art" aria-hidden="true">
+                <span class="hero-art-circle"></span>
+                <span class="hero-art-letter">A</span>
+                <span class="hero-art-caption">YOUR CAMPUS<br>YOUR COMMUNITY</span>
+            </div>
+        </section>
 
-            <div class="event-filters" aria-label="Search and filter events">
-                <label>
-                    Search by title
-                    <input id="title-search" type="search" placeholder="Search event titles">
-                </label>
+        <section class="content-section upcoming-section" id="calendar">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">MAKE A PLAN</p>
+                    <h2>Coming up on campus</h2>
+                </div>
+                <a class="text-link" href="#events">Browse all events <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="event-list upcoming-list"></div>
+            <p class="event-status upcoming-status" role="status" aria-live="polite">Loading upcoming events...</p>
+        </section>
+
+        <section class="content-section all-events-section" id="events">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">EXPLORE THE POSSIBILITIES</p>
+                    <h2>All campus events</h2>
+                </div>
+            </div>
+
+            <div class="event-filters" aria-label="Filter events">
                 <label>
                     Category
                     <select id="category-filter">
@@ -51,16 +91,16 @@
                 </label>
             </div>
 
-            <!-- Groups the event cards so they can all share the same layout and spacing -->
-            <div class="event-list"></div>
+            <div class="event-list all-event-list"></div>
             <p class="event-status" role="status" aria-live="polite">Loading events...</p>
         </section>
-
     </main>
 
     <script>
-        const eventList = document.querySelector(".event-list");
-        const eventStatus = document.querySelector(".event-status");
+        const upcomingList = document.querySelector(".upcoming-list");
+        const upcomingStatus = document.querySelector(".upcoming-status");
+        const eventList = document.querySelector(".all-event-list");
+        const eventStatus = document.querySelector(".all-events-section .event-status");
         const titleSearch = document.querySelector("#title-search");
         const categoryFilter = document.querySelector("#category-filter");
         const locationFilter = document.querySelector("#location-filter");
@@ -134,6 +174,24 @@
             }
         }
 
+        function renderUpcomingEvents() {
+            const now = new Date();
+            const upcomingEvents = allEvents
+                .filter((event) => {
+                    const start = parseDate(event.start_time);
+                    return start && start >= now;
+                })
+                .sort((first, second) => parseDate(first.start_time) - parseDate(second.start_time))
+                .slice(0, 3);
+
+            upcomingList.replaceChildren(...upcomingEvents.map(createEventCard));
+            upcomingStatus.textContent = allEvents.length === 0
+                ? "Events will appear here as soon as they're available."
+                : upcomingEvents.length === 0
+                    ? "There are no upcoming events right now. Check back soon."
+                    : "";
+        }
+
         [titleSearch, categoryFilter, locationFilter, dateFilter, dateRangeFilter]
             .forEach((filter) => filter.addEventListener("input", renderEvents));
         categoryFilter.addEventListener("change", renderEvents);
@@ -190,10 +248,13 @@
                     categoryFilter.append(option);
                 });
                 renderEvents();
+                renderUpcomingEvents();
             } catch (error) {
                 console.error("Unable to load events:", error);
                 const reason = error instanceof Error ? error.message : String(error);
-                eventStatus.textContent = `Unable to load events: ${reason}. Make sure /api/events is available from this server.`;
+                const message = `Unable to load events: ${reason}. Make sure /api/events is available from this server.`;
+                eventStatus.textContent = message;
+                upcomingStatus.textContent = message;
             }
         }
 

@@ -8,7 +8,7 @@ A CSC443 Software Engineering team project at Augsburg University. Students can 
 
 | Feature | Status |
 | --- | --- |
-| Browse events from MySQL | **Working** through the Spring Boot GET API and browser. On November 16, Docker returned 22 seeded events. |
+| Browse events from MySQL | **Working** through the Spring Boot GET API and browser. The current checked-in seed contains 100 events for a fresh database. |
 | Search/filter events | **Implemented** in the browser: title, category, location, calendar date, and today/this-week filters. |
 | Create an event | **Backend implemented**: `POST /api/events`, request validation, and mocked controller tests. **Not** yet verified with a real database INSERT; there is no creation form in the merged frontend. |
 | Login | **UI prototype only** at `/css/login.html`. No user authentication, password verification, or access control. |
@@ -16,7 +16,7 @@ A CSC443 Software Engineering team project at Augsburg University. Students can 
 | Setup on Windows via Docker | **Verified November 16, 2026**: MySQL healthy, Spring Boot running, `/` HTTP 200, `/api/events` HTTP 200, 22 events retrieved. |
 | Setup on macOS via Docker | Same intended Compose configuration, **not yet tested on a teammate's Mac**. |
 
-The event-search and event-creation backend PRs were merged into `main` on November 5, 2026. Docker setup is currently on `feature/cet-integration`; a new GitHub clone of `main` will **not** contain it until that branch is merged.
+The event-search and event-creation backend PRs were merged into `main` on November 5, 2026. The Docker setup and refreshed 100-event seed are on `feature/event-search-filters`; a new clone of `main` will **not** contain these latest changes until the branch is merged.
 
 **Scope boundary:** A working event-listing site does not prove that users can create events from the website, log in, or delete events.
 
@@ -31,10 +31,10 @@ Docker Compose starts two containers together:
 
 ### 1. Obtain the source
 
-After `feature/cet-integration` is merged, a teammate can run:
+Until `feature/event-search-filters` is merged, clone that branch to get the Docker setup and refreshed seed:
 
 ```bash
-git clone https://github.com/iymen-stack/campus-event-tracker.git
+git clone --branch feature/event-search-filters https://github.com/iymen-stack/campus-event-tracker.git
 cd campus-event-tracker
 ```
 
@@ -80,7 +80,7 @@ What the commands mean:
 | `docker compose up --build -d` | Build the app image, start MySQL, wait for its health check, and start Spring Boot in the background. |
 | `docker compose ps` | Check that `db` is healthy and `app` is running. |
 
-The first run needs network access to download Docker images and Maven dependencies. On a new **empty Docker data volume**, MySQL automatically imports `docker/db/seed.sql` **once**. Subsequent starts reuse the stored database; changing the seed file does **not** update an existing volume.
+The first run needs network access to download Docker images and Maven dependencies. On a new **empty Docker data volume**, MySQL automatically imports `docker/db/seed.sql` **once**; the current seed contains 100 events and 20 locations. Native H2 development also uses this dataset via `backend/src/main/resources/data.sql`. Subsequent Docker starts reuse the stored database; changing the seed file does **not** update an existing volume.
 
 The Docker MySQL server is internal to the Compose network and does not publish port 3306 to Windows/macOS. Thus an existing host MySQL installation need not be stopped. The Spring application connects to the service name `db` inside Docker.
 
@@ -93,7 +93,7 @@ Open these URLs on the **same computer**:
 
 If `APP_PORT` is different, use that port in both URLs. The default app is bound to `127.0.0.1`, so this is for local development: it is not a publicly hosted site and will not automatically let teammates visit **your** instance.
 
-On November 16, 2026, Windows Docker verification returned HTTP 200 on both URLs and 22 events from the seeded MySQL container. **A fresh macOS installation and real POST persistence are separate pending tests.**
+The November 16, 2026 Windows Docker verification returned HTTP 200 on both URLs and 22 events from the then-current seed. The checked-in seed now contains 100 events, but that updated count still needs a fresh-database runtime verification. **A fresh macOS installation and real POST persistence are separate pending tests.**
 
 ### 5. Stop, restart, rebuild, and inspect logs
 
@@ -245,7 +245,7 @@ On macOS/Linux: `./mvnw test`. A local backend test may need suitable datasource
 ## Next integration milestones
 
 1. Verify a valid `POST /api/events` produces one new row in the **Docker** database and appears in a subsequent GET. Verify invalid requests do not insert rows.
-2. Agree on the actual location IDs/schema with the team and reconcile Samson's newer proposed 100+ event dataset. The current seed derives from the November 4 export and is not evidence of subsequent changes.
+2. Verify the refreshed 100-event seed against the team's canonical dataset and run it against a fresh database. Existing Docker volumes need a reviewed data migration; pulling a new seed does not update them.
 3. Integrate a frontend event-creation form against the verified POST contract.
 4. Have a teammate run this setup from a **fresh clone on macOS**, following the instructions without hidden manual steps.
 5. Decide the course-required scope for login/authentication and deletion; neither is complete.
