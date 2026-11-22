@@ -165,7 +165,9 @@
                 && matchesDate(event)
             );
 
-            eventList.replaceChildren(...matchingEvents.map(createEventCard));
+            eventList.replaceChildren(
+                ...matchingEvents.map(event => createEventCard(event, true))
+            );
             if (allEvents.length === 0) {
                 eventStatus.textContent = "No events found.";
             } else if (matchingEvents.length === 0) {
@@ -219,8 +221,48 @@
                 timeStyle: "short"
             });
         }
+        async function deleteEvent(event, button) {
+            const id = Number(event.event_id);
 
-        function createEventCard(event) {
+            if (!Number.isSafeInteger(id) || id <= 0) {
+                alert("This event has an invalid ID.");
+                return;
+            }
+
+            const confirmed = confirm(
+                `Permanently delete "${event.title}"?\n\n` +
+                "This event will be removed from the shared event list."
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            button.disabled = true;
+
+            try {
+                const response = await fetch(`/api/events/${id}`, {
+                    method: "DELETE"
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Deletion failed: HTTP ${response.status}`);
+                }
+
+                allEvents = allEvents.filter(
+                    item => Number(item.event_id) !== id
+                );
+
+                renderEvents();
+                renderUpcomingEvents();
+
+            } catch (error) {
+                console.error("Unable to delete event:", error);
+                alert("Could not delete this event. Please try again.");
+                button.disabled = false;
+            }
+        }
+        function createEventCard(event, allowDelete = false) {
             const card = document.createElement("article");
             card.className = "event-card";
 
@@ -234,6 +276,25 @@
             location.textContent = event.location_name || "Location unavailable";
 
             card.append(title, dateTime, location);
+
+            if (allowDelete) {
+                const deleteButton = document.createElement("button");
+
+                deleteButton.type = "button";
+                deleteButton.className = "delete-event-button";
+                deleteButton.textContent = "Delete";
+                deleteButton.setAttribute(
+                    "aria-label",
+                    `Delete ${event.title || "Untitled event"}`
+                );
+
+                deleteButton.addEventListener("click", () => {
+                    deleteEvent(event, deleteButton);
+                });
+
+                card.append(deleteButton);
+            }
+
             return card;
         }
 
