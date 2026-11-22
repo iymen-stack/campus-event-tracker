@@ -31,8 +31,9 @@
             <div class="hero-copy">
                 <p class="eyebrow">AUGSBURG UNIVERSITY · MINNEAPOLIS, MN</p>
                 <h1>Find your next campus moment.</h1>
-                <p class="hero-description">Discover what's happening around Augsburg, meet your community, and make the most of being on campus.</p>
-                <form class="hero-search" role="search" onsubmit="return false">
+                <p class="hero-description">Discover what's happening around Augsburg, meet your community, and make the
+                    most of being on campus.</p>
+                <form class="hero-search" role="search">
                     <label class="sr-only" for="title-search">Search campus events</label>
                     <input id="title-search" type="search" placeholder="Search events by name">
                     <button type="submit" aria-label="Search events">Search</button>
@@ -196,6 +197,16 @@
             .forEach((filter) => filter.addEventListener("input", renderEvents));
         categoryFilter.addEventListener("change", renderEvents);
         dateRangeFilter.addEventListener("change", renderEvents);
+        document.querySelector(".hero-search").addEventListener("submit", (event) => {
+            event.preventDefault();
+
+            renderEvents();
+
+            document.querySelector("#events").scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        });
 
         function formatDateTime(value) {
             const date = parseDate(value);
