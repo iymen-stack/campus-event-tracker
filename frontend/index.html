@@ -21,6 +21,7 @@
                 <a href="./index.html" aria-current="page">Home</a>
                 <a href="#events">All Events</a>
                 <a href="#calendar">Calendar</a>
+                <a href="#create-event">Create Event</a>
                 <a class="login-link" href="css/login.html">Login</a>
             </nav>
         </div>
@@ -37,12 +38,57 @@
                     <input id="title-search" type="search" placeholder="Search events by name">
                     <button type="submit" aria-label="Search events">Search</button>
                 </form>
+                <a class="hero-create-link" href="#create-event">Create a campus event <span aria-hidden="true">→</span></a>
                 <p class="hero-note">Find student activities, performances, athletics, and more.</p>
             </div>
             <div class="hero-art" aria-hidden="true">
                 <span class="hero-art-circle"></span>
                 <span class="hero-art-letter">A</span>
                 <span class="hero-art-caption">YOUR CAMPUS<br>YOUR COMMUNITY</span>
+            </div>
+        </section>
+
+        <section class="content-section create-event-section" id="create-event">
+            <div class="create-event-panel">
+                <div class="create-event-heading">
+                    <p class="eyebrow">HOST SOMETHING GREAT</p>
+                    <h2>Create a campus event</h2>
+                    <p>Share the details with the Augsburg community.</p>
+                </div>
+
+                <form id="create-event-form" class="create-event-form">
+                    <label class="form-field form-field-wide">
+                        Event title
+                        <input id="event-title" name="title" type="text" maxlength="150" required placeholder="e.g. Coding Night">
+                    </label>
+
+                    <label class="form-field">
+                        Category
+                        <input id="event-category" name="category" type="text" maxlength="50" placeholder="e.g. Student Activities">
+                    </label>
+
+                    <label class="form-field">
+                        Location
+                        <select id="event-location" name="locationId" required>
+                            <option value="">Loading locations...</option>
+                        </select>
+                    </label>
+
+                    <label class="form-field">
+                        Start date &amp; time
+                        <input id="event-start" name="startTime" type="datetime-local" required>
+                    </label>
+
+                    <label class="form-field">
+                        End date &amp; time
+                        <input id="event-end" name="endTime" type="datetime-local" required>
+                    </label>
+
+                    <div class="form-actions form-field-wide">
+                        <p id="create-event-status" class="create-event-status" role="status" aria-live="polite"></p>
+                        <button id="create-event-submit" type="submit">Create event</button>
+                    </div>
+                </form>
             </div>
         </section>
 
@@ -106,6 +152,14 @@
         const locationFilter = document.querySelector("#location-filter");
         const dateFilter = document.querySelector("#date-filter");
         const dateRangeFilter = document.querySelector("#date-range-filter");
+        const createEventForm = document.querySelector("#create-event-form");
+        const eventTitle = document.querySelector("#event-title");
+        const eventCategory = document.querySelector("#event-category");
+        const eventLocation = document.querySelector("#event-location");
+        const eventStart = document.querySelector("#event-start");
+        const eventEnd = document.querySelector("#event-end");
+        const createEventStatus = document.querySelector("#create-event-status");
+        const createEventSubmit = document.querySelector("#create-event-submit");
         let allEvents = [];
 
         function parseDate(value) {
@@ -226,6 +280,130 @@
             return card;
         }
 
+        function setCreateStatus(message, type = "") {
+            createEventStatus.textContent = message;
+            createEventStatus.className = `create-event-status${type ? ` ${type}` : ""}`;
+        }
+
+        async function loadLocations() {
+            try {
+                const response = await fetch("/api/locations");
+                if (!response.ok) {
+                    throw new Error(`Request failed with status ${response.status}`);
+                }
+
+                const locations = await response.json();
+                if (!Array.isArray(locations)) {
+                    throw new Error("The locations response was not a list");
+                }
+
+                eventLocation.replaceChildren();
+                const placeholder = document.createElement("option");
+                placeholder.value = "";
+                placeholder.textContent = "Select a location";
+                eventLocation.append(placeholder);
+
+                locations.forEach((location) => {
+                    const option = document.createElement("option");
+                    option.value = location.location_id;
+                    option.textContent = location.name;
+                    eventLocation.append(option);
+                });
+
+                if (locations.length === 0) {
+                    eventLocation.disabled = true;
+                    setCreateStatus("No locations are currently available.");
+                }
+            } catch (error) {
+                console.error("Unable to load locations:", error);
+                eventLocation.replaceChildren(new Option("Unable to load locations", ""));
+                eventLocation.disabled = true;
+                setCreateStatus("Locations could not be loaded. Refresh the page and try again.", "error");
+            }
+        }
+
+        function setMinimumStartTime() {
+            const now = new Date();
+            now.setSeconds(0, 0);
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, "0");
+            const day = String(now.getDate()).padStart(2, "0");
+            const hours = String(now.getHours()).padStart(2, "0");
+            const minutes = String(now.getMinutes()).padStart(2, "0");
+            eventStart.min = `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        eventStart.addEventListener("change", () => {
+            eventEnd.min = eventStart.value;
+            if (eventEnd.value && eventEnd.value <= eventStart.value) {
+                eventEnd.value = "";
+            }
+        });
+
+        createEventForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            setCreateStatus("");
+
+            if (!createEventForm.reportValidity()) {
+                return;
+            }
+
+            if (eventEnd.value <= eventStart.value) {
+                setCreateStatus("End date and time must be after the start date and time.", "error");
+                eventEnd.focus();
+                return;
+            }
+
+            createEventSubmit.disabled = true;
+            createEventSubmit.textContent = "Creating...";
+
+            const payload = {
+                title: eventTitle.value.trim(),
+                category: eventCategory.value.trim(),
+                locationId: Number(eventLocation.value),
+                startTime: eventStart.value,
+                endTime: eventEnd.value
+            };
+
+            try {
+                const response = await fetch("/api/events", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.status === 201) {
+                    createEventForm.reset();
+                    setMinimumStartTime();
+                    eventEnd.min = "";
+                    setCreateStatus("Event created successfully.", "success");
+                    await loadEvents();
+                    document.querySelector("#events").scrollIntoView({ behavior: "smooth", block: "start" });
+                    return;
+                }
+
+                let message = "The event could not be created.";
+                try {
+                    const problem = await response.json();
+                    if (problem.message) {
+                        message = problem.message;
+                    } else if (problem.error) {
+                        message = problem.error;
+                    }
+                } catch (_error) {
+                    // Keep the fallback message for non-JSON error responses.
+                }
+
+                setCreateStatus(`Unable to create event: ${message}`, "error");
+            } catch (error) {
+                console.error("Unable to create event:", error);
+                setCreateStatus("Unable to create event because the server could not be reached.", "error");
+            } finally {
+                createEventSubmit.disabled = false;
+                createEventSubmit.textContent = "Create event";
+            }
+        });
+
         async function loadEvents() {
             try {
                 const response = await fetch("/api/events");
@@ -241,6 +419,7 @@
                 allEvents = responseEvents;
                 const categories = [...new Set(allEvents.map((event) => event.category).filter(Boolean))]
                     .sort((a, b) => a.localeCompare(b));
+                categoryFilter.querySelectorAll("option:not([value=''])").forEach((option) => option.remove());
                 categories.forEach((category) => {
                     const option = document.createElement("option");
                     option.value = category;
@@ -258,6 +437,8 @@
             }
         }
 
+        setMinimumStartTime();
+        loadLocations();
         loadEvents();
     </script>
 </body>
