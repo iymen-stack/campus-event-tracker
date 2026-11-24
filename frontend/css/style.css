@@ -170,6 +170,26 @@ main {
     font-size: 12px;
 }
 
+.hero-create-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 20px;
+    padding: 11px 15px;
+    border: 1px solid #660033;
+    border-radius: 6px;
+    color: #660033;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+.hero-create-link:hover {
+    background: #660033;
+    color: #fff;
+}
+
 .hero-art {
     position: relative;
     display: grid;
@@ -344,6 +364,131 @@ main {
     text-align: center;
 }
 
+.create-event-section {
+    scroll-margin-top: 28px;
+}
+
+.create-event-panel {
+    display: grid;
+    grid-template-columns: minmax(220px, 0.7fr) minmax(0, 1.6fr);
+    gap: 44px;
+    padding: 42px;
+    border: 1px solid #e9dfe5;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #fff 0%, #faf6f8 100%);
+    box-shadow: 0 12px 34px rgb(91 40 67 / 7%);
+}
+
+.create-event-heading {
+    padding-right: 28px;
+    border-right: 1px solid #eadfe5;
+}
+
+.create-event-heading h2 {
+    margin: 0 0 12px;
+    color: #4d0026;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 34px;
+    font-weight: 500;
+    line-height: 1.12;
+}
+
+.create-event-heading > p:last-child {
+    margin: 0;
+    color: #746b72;
+    line-height: 1.6;
+}
+
+.create-event-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    color: #514a51;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.form-field-wide {
+    grid-column: 1 / -1;
+}
+
+.form-field input,
+.form-field select {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 46px;
+    padding: 10px 12px;
+    border: 1px solid #ddd3d8;
+    border-radius: 7px;
+    background: #fff;
+    color: #332b32;
+    font: inherit;
+    font-weight: normal;
+    outline: none;
+}
+
+.form-field input:focus,
+.form-field select:focus {
+    border-color: #660033;
+    box-shadow: 0 0 0 3px rgb(102 0 51 / 10%);
+}
+
+.form-field input::placeholder {
+    color: #9b9297;
+}
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    min-height: 46px;
+}
+
+.form-actions button {
+    min-height: 46px;
+    min-width: 150px;
+    padding: 10px 18px;
+    border: 0;
+    border-radius: 7px;
+    background: #660033;
+    color: #fff;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+}
+
+.form-actions button:hover {
+    background: #4d0026;
+}
+
+.form-actions button:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.create-event-status {
+    flex: 1;
+    margin: 0;
+    color: #746b72;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.create-event-status.success {
+    color: #25603a;
+}
+
+.create-event-status.error {
+    color: #a12626;
+}
+
 .sr-only {
     position: absolute;
     width: 1px;
@@ -446,6 +591,19 @@ main {
     .hero-art-letter {
         font-size: 110px;
     }
+
+    .create-event-panel {
+        grid-template-columns: 1fr;
+        gap: 28px;
+        padding: 32px;
+    }
+
+    .create-event-heading {
+        padding-right: 0;
+        padding-bottom: 24px;
+        border-right: 0;
+        border-bottom: 1px solid #eadfe5;
+    }
 }
 
 @media (max-width: 560px) {
@@ -494,5 +652,30 @@ main {
 
     .section-heading h2 {
         font-size: 28px;
+    }
+
+    .create-event-panel {
+        padding: 24px 20px;
+    }
+
+    .create-event-heading h2 {
+        font-size: 29px;
+    }
+
+    .create-event-form {
+        grid-template-columns: 1fr;
+    }
+
+    .form-field-wide {
+        grid-column: 1;
+    }
+
+    .form-actions {
+        align-items: stretch;
+        flex-direction: column-reverse;
+    }
+
+    .form-actions button {
+        width: 100%;
     }
 }
